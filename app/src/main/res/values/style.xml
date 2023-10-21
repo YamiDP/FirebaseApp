@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ColoredButton" parent="@style/Widget.AppCompat.Button.Colored"> <item name="colorButtonNormal">@color/button_color</item> </style>
+</resources>

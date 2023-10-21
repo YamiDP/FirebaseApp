@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "499887142467",
+    "project_id": "fir-app-c9a86",
+    "storage_bucket": "fir-app-c9a86.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:499887142467:android:ca33bd41e76e36067186f6",
+        "android_client_info": {
+          "package_name": "hcmute.edu.vn.firebaseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBOresC9ZEe7GnjO2Rna2kWWEL5V7Bvwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

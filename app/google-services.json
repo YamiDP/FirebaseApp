@@ -12,7 +12,20 @@
           "package_name": "hcmute.edu.vn.firebaseapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "499887142467-l1eml5rtslu6pu7gt729ckn35d3jls34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "hcmute.edu.vn.firebaseapp",
+            "certificate_hash": "e1dfc06931329342269ffcd940ee3dc2aea011a3"
+          }
+        },
+        {
+          "client_id": "499887142467-jg97to63o3lsv6d4ndbr7p1s9e8k23ph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCBOresC9ZEe7GnjO2Rna2kWWEL5V7Bvwk"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "499887142467-jg97to63o3lsv6d4ndbr7p1s9e8k23ph.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -22,7 +22,8 @@
         android:text="Đăng nhập"
         android:textColor="@color/black"
         android:textSize="25dp"
-        android:layout_marginTop="250dp"/>
+        android:paddingBottom="10dp"
+        android:layout_above="@+id/emailTIL"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -82,7 +83,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/recoverPassTv">
+        android:layout_below="@id/recoverPassTv"
+        android:paddingTop="10dp">
     </com.google.android.gms.common.SignInButton>
     <!--TextView: Click go to RegisterActivity-->
     <TextView

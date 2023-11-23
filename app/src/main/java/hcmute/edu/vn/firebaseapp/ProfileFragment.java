@@ -23,6 +23,9 @@ import android.content.ContentValues;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -91,45 +94,8 @@ public class ProfileFragment extends Fragment {
     //for checking profile or cover photo
     String profileOrCoverPhoto;
 
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     public ProfileFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -145,12 +111,9 @@ public class ProfileFragment extends Fragment {
         databaseReference =firebaseDatabase.getReference("Users");
         storage = FirebaseStorage.getInstance(); // firebase reference
 
-
-
         //init arrays of permission
         cameraPermissions =  new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermissions =  new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
 
         //init views
         avatarIv = view.findViewById(R.id.avatarIv);
@@ -175,7 +138,6 @@ public class ProfileFragment extends Fragment {
                     String image = ""+ ds.child("image").getValue();
                     String cover = ""+ ds.child("cover").getValue();
 
-
                     //set data
                     nameTv.setText(name);
                     emailTv.setText(email);
@@ -195,11 +157,8 @@ public class ProfileFragment extends Fragment {
                     }
                     catch (Exception e){
                         //if there is any exception while getting image then set default
-
-
                     }
                 }
-
             }
 
             @Override
@@ -226,13 +185,10 @@ public class ProfileFragment extends Fragment {
         //request runtime storage permission
         requestPermissions(storagePermissions, STORAGE_REQUEST_CODE );
     }
+
     private boolean checkCameraPermission(){
-
-
         boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
                 == (PackageManager.PERMISSION_GRANTED);
-
-
         boolean result1 = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == (PackageManager.PERMISSION_GRANTED);
         return result && result1;
@@ -272,8 +228,6 @@ public class ProfileFragment extends Fragment {
                     showNamePhoneUpdatePicDialog("phone");
                 }
             }
-
-
             private void showNamePhoneUpdatePicDialog(String key) {
                 //custom dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -339,8 +293,6 @@ public class ProfileFragment extends Fragment {
     }
     private void showImagePicDialog() {
         // show dialog containing option Camera and Gallery to pick the image
-
-
         String options[] = {"Camera", " Gallery"};
         //alert dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -413,19 +365,14 @@ public class ProfileFragment extends Fragment {
             }
             if (requestCode == IMAGE_PICK_CAMERA_CODE){
                 // image is picked from camera, get uri image
-
-
                 uploadProfileCoverPhoto(image_uri);
             }
         }
-
-
         super.onActivityResult(requestCode, resultCode, data);
     }
     private void uploadProfileCoverPhoto(Uri uri) {
         //show progress
         pd.show();
-
 
         //path and name of image to be stored in firebase storage
         String filePathAndName = storagePath+ ""+profileOrCoverPhoto +"_"+ user.getUid();
@@ -439,15 +386,12 @@ public class ProfileFragment extends Fragment {
                         while (!uriTask.isSuccessful());
                         Uri dowloadUri = uriTask.getResult();
 
-
                         //check if image is upload or not and url is received
                         if (uriTask.isSuccessful()){
                             //image upload
                             //add update url in user's database
                             HashMap<String, Object> results = new HashMap<>();
                             results.put(profileOrCoverPhoto, dowloadUri.toString());
-
-
                             databaseReference.child(user.getUid()).updateChildren(results)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
@@ -456,8 +400,6 @@ public class ProfileFragment extends Fragment {
                                             //dismiss progress bar
                                             pd.dismiss();
                                             Toast.makeText(getActivity(),"Image Update. . .", Toast.LENGTH_SHORT).show();
-
-
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -467,8 +409,6 @@ public class ProfileFragment extends Fragment {
                                             //dismiss progress bar
                                             pd.dismiss();
                                             Toast.makeText(getActivity(),"Error Updating Image. . .", Toast.LENGTH_SHORT).show();
-
-
                                         }
                                     });
                         }
@@ -476,11 +416,7 @@ public class ProfileFragment extends Fragment {
                             //error
                             pd.dismiss();
                             Toast.makeText(getActivity(), "Some error occured", Toast.LENGTH_SHORT).show();
-
-
                         }
-
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -489,14 +425,8 @@ public class ProfileFragment extends Fragment {
                         //there were some error(s), get and show error message,dismiss progress dialog
                         pd.dismiss();
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-
-
                     }
                 });
-
-
-
-
     }
     private void pickFromCamera() {
         //intent of picking image from device camera
@@ -517,5 +447,44 @@ public class ProfileFragment extends Fragment {
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, IMAGE_PICK_GALLERY_CODE);
     }
+    private void checkUserStatus(){
+        //get current user
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user!=null){
+            //user is signed in stay here
+            //set email of logged in user
+            //mProfileTv.setText(user.getEmail());
+        }
+        else {
+            //user not signed in, go to main activity
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+        }
+    }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState){
+        setHasOptionsMenu(true);//to show menu options in fragment
+        super.onCreate(savedInstanceState);
+    }
 
+    /*inflate options menu*/
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //ìnflating menu
+        inflater.inflate(R.menu.menu_main,menu);
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    /*handle menu item clicks*/
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //get item id
+        int id  = item.getItemId();
+        if(id == R.id.action_logout){
+            firebaseAuth.signOut();
+            checkUserStatus();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

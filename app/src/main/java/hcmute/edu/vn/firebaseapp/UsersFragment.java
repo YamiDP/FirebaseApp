@@ -29,7 +29,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
+import hcmute.edu.vn.firebaseapp.adapters.AdapterUsers;
+import hcmute.edu.vn.firebaseapp.models.ModelUser;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -161,9 +163,7 @@ public class UsersFragment extends Fragment {
                         modelUser.getEmail().toLowerCase().contains(query.toLowerCase())){
                             userList.add(modelUser);
                         }
-
                     }
-
                     //adapter
                     adapterUsers = new AdapterUsers(getActivity(), userList);
                     //set adapter to recycler view

@@ -1,6 +1,7 @@
-package hcmute.edu.vn.firebaseapp;
+package hcmute.edu.vn.firebaseapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import hcmute.edu.vn.firebaseapp.ChatActivity;
+import hcmute.edu.vn.firebaseapp.models.ModelUser;
+import hcmute.edu.vn.firebaseapp.R;
 
 public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
 
@@ -40,6 +45,7 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyHolder myHolder, int i) {
         //get data
+        String hisUID = userList.get(i).getUid();
         String userImage = userList.get(i).getImage();
         String userName = userList.get(i).getName();
         String userEmail = userList.get(i).getEmail();
@@ -55,12 +61,11 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
         }
 
         //handle item click
-        myHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context,""+userEmail, Toast.LENGTH_SHORT).show();
-            }
-        });
+        myHolder.itemView.setOnClickListener((v -> {
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra("hisUid",hisUID);
+            context.startActivity(intent);
+        }));
     }
 
     @Override

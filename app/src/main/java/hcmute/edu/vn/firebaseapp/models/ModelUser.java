@@ -1,4 +1,4 @@
-package hcmute.edu.vn.firebaseapp;
+package hcmute.edu.vn.firebaseapp.models;
 
 public class ModelUser {
 

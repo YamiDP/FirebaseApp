@@ -1,6 +1,8 @@
 package hcmute.edu.vn.firebaseapp.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import hcmute.edu.vn.firebaseapp.ChatActivity;
+import hcmute.edu.vn.firebaseapp.ThereProfileActivity;
 import hcmute.edu.vn.firebaseapp.models.ModelUser;
 import hcmute.edu.vn.firebaseapp.R;
 
@@ -62,9 +65,31 @@ public class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
 
         //handle item click
         myHolder.itemView.setOnClickListener((v -> {
-            Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("hisUid",hisUID);
-            context.startActivity(intent);
+            //show dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setItems(new String[] {"Profile", "Chat"}, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which==0) {
+                        //profile clicked
+                        /*click to go to ThereProfileActivity with uid, this uid is of clicked user
+                          which will be used to show user specific data/posts*/
+                        Intent intent = new Intent (context, ThereProfileActivity.class);
+                        intent.putExtra("uid", hisUID);
+                        context.startActivity(intent);
+                    }
+                    if (which==1) {
+                        //chat clicked
+                        /*Click user from user list to start chatting/messaging
+                        * Start activity by putting UID of receiver
+                        * We will use that UID to identify the user we are gonna chat*/
+                        Intent intent = new Intent(context, ChatActivity.class);
+                        intent.putExtra("hisUid",hisUID);
+                        context.startActivity(intent);
+                    }
+                }
+            });
+            builder.create().show();
         }));
     }
 

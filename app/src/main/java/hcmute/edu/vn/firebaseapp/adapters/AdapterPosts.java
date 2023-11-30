@@ -1,14 +1,19 @@
 package hcmute.edu.vn.firebaseapp.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,12 +21,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import hcmute.edu.vn.firebaseapp.AddPostActivity;
 import hcmute.edu.vn.firebaseapp.R;
 import hcmute.edu.vn.firebaseapp.ThereProfileActivity;
 import hcmute.edu.vn.firebaseapp.models.ModelPost;
@@ -30,12 +46,39 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder> {
 
     Context context;
     List<ModelPost> postList;
+    String myUid;
+
 
     public AdapterPosts(Context context, List<ModelPost> postList) {
         this.context = context;
         this.postList = postList;
+        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
+    class MyHolder extends RecyclerView.ViewHolder {
+        //views from row_post.xml
+        ImageView uPictureIv, pImageIv;
+        TextView uNameTv, pTimeTv, pTitleTv, pDescriptionTv, pLikesTv;
+        ImageButton moreßtn;
+        Button likeBtn, commentBtn, shareBtn;
+        LinearLayout profileLayout;
 
+        public MyHolder(@NonNull View itemView) {
+            super(itemView);
+            //init views
+            uPictureIv = itemView.findViewById(R.id.uPictureIv);
+            pImageIv = itemView.findViewById(R.id.pImageIv);
+            uNameTv = itemView.findViewById(R.id.uNameTv);
+            pTimeTv = itemView.findViewById(R.id.pTimeTv);
+            pTitleTv = itemView.findViewById(R.id.pTitleTv);
+            pDescriptionTv = itemView.findViewById(R.id.pDescriptionTv);
+            pLikesTv = itemView.findViewById(R.id.pLikeTv);
+            moreßtn = itemView.findViewById(R.id.moreBtn);
+            likeBtn = itemView.findViewById(R.id.likeBtn);
+            commentBtn = itemView.findViewById(R.id.commentBtn);
+            shareBtn = itemView.findViewById(R.id.shareBtn);
+            profileLayout = itemView.findViewById(R.id.profileLayout);
+        }
+    }
     @NonNull
     @Override
     public MyHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -82,6 +125,8 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder> {
             myHolder.pImageIv.setVisibility(View.GONE);
         }
         else {
+            //show imageView
+            myHolder.pImageIv.setVisibility(View.VISIBLE);//make sure to correct this
             try{
                 Picasso.get().load(pImage).into(myHolder.pImageIv);
             }
@@ -98,8 +143,7 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder> {
         myHolder.moreßtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //will implement later
-                Toast.makeText(context, "More", Toast.LENGTH_SHORT).show();
+                showMoreOptions(myHolder.moreßtn, uid, myUid, pId, pImage);
             }
         });
         myHolder.likeBtn.setOnClickListener(new View.OnClickListener() {
@@ -137,37 +181,123 @@ public class AdapterPosts extends RecyclerView.Adapter<AdapterPosts.MyHolder> {
 
     }
 
+    private void showMoreOptions(ImageButton moreßtn, String uid, String myUid, String pId, String pImage) {
+        //creating popup menu currently having option Delete, we will add more options later
+        PopupMenu popupMenu = new PopupMenu(context, moreßtn, Gravity.END);
+        //show delete option in only post(s) of currently signed-in user
+        if (uid.equals (myUid)) {
+            //add items in menu
+            popupMenu.getMenu().add(Menu.NONE, 0, 0, "Delete");
+            popupMenu.getMenu().add(Menu.NONE, 1, 0, "Edit");
+        }
+        //item click listener
+        popupMenu.setOnMenuItemClickListener(new PopupMenu. OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick (MenuItem menuItem) {
+                int id = menuItem.getItemId();
+                    if (id==0) {
+                        //delete is clicked
+                        beginDelete(pId,pImage);
+                    }
+                    else if (id==1) {
+                        //edit is clicked
+                        //start AddPostActivity with key "editPost" and the id of the post clicked
+                        Intent intent = new Intent(context, AddPostActivity.class);
+                        intent.putExtra("key", "editPost");
+                        intent.putExtra("editPostId",pId);
+                        context.startActivity(intent);
+                    }
+                    return false;
+            }
+
+        });
+        //show menu
+        popupMenu.show();
+    }
+
+    private void beginDelete(String pId, String pImage) {
+        //post can be with or without image
+        if(pImage.equals("noImage")){
+            deleteWithoutImage(pId);
+        }
+        else {
+            //post is with image
+            deleteWithImage(pId, pImage);
+        }
+
+    }
+    private void deleteWithImage(String pId, String pImage) {
+        //progress bar
+        final ProgressDialog pd = new ProgressDialog(context);
+        pd.setMessage("Deleting...");
+        /*Steps:
+        1) Delete Image using url
+        2) Delete from database using post id*/
+        StorageReference picRef = FirebaseStorage.getInstance().getReferenceFromUrl(pImage);
+        picRef.delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess (Void avoid) {
+                        //image deleted, now delete database
+                        Query fquery = FirebaseDatabase.getInstance().getReference("Posts").orderByChild("pId").equalTo(pId);
+                        fquery.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for(DataSnapshot ds: dataSnapshot.getChildren()){
+                                    ds.getRef().removeValue();
+                                }
+                                //deleted
+                                Toast.makeText(context, "Deleted successfully",Toast.LENGTH_SHORT).show();
+                                pd.dismiss();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure (@NonNull Exception e) {
+                        //failed, can't go further
+                        pd.dismiss();
+                        Toast.makeText(context,""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    private void deleteWithoutImage(String pId) {
+        //progress bar
+        final ProgressDialog pd = new ProgressDialog(context);
+        pd.setMessage("Deleting...");
+        //image deleted, now delete database
+        Query fquery = FirebaseDatabase.getInstance().getReference("Posts").orderByChild("pId").equalTo(pId);
+        fquery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds: dataSnapshot.getChildren()){
+                    ds.getRef().removeValue();
+                }
+                //deleted
+                Toast.makeText(context, "Deleted successfully",Toast.LENGTH_SHORT).show();
+                pd.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     @Override
     public int getItemCount() {
         return postList.size();
     }
 
     //view holder class
-    class MyHolder extends RecyclerView.ViewHolder {
-        //views from row_post.xml
-        ImageView uPictureIv, pImageIv;
-        TextView uNameTv, pTimeTv, pTitleTv, pDescriptionTv, pLikesTv;
-        ImageButton moreßtn;
-        Button likeBtn, commentBtn, shareBtn;
-        LinearLayout profileLayout;
 
-        public MyHolder(@NonNull View itemView) {
-            super(itemView);
-            //init views
-            uPictureIv = itemView.findViewById(R.id.uPictureIv);
-            pImageIv = itemView.findViewById(R.id.pImageIv);
-            uNameTv = itemView.findViewById(R.id.uNameTv);
-            pTimeTv = itemView.findViewById(R.id.pTimeTv);
-            pTitleTv = itemView.findViewById(R.id.pTitleTv);
-            pDescriptionTv = itemView.findViewById(R.id.pDescriptionTv);
-            pLikesTv = itemView.findViewById(R.id.pLikeTv);
-            moreßtn = itemView.findViewById(R.id.moreBtn);
-            likeBtn = itemView.findViewById(R.id.likeBtn);
-            commentBtn = itemView.findViewById(R.id.commentBtn);
-            shareBtn = itemView.findViewById(R.id.shareBtn);
-            profileLayout = itemView.findViewById(R.id.profileLayout);
-        }
-    }
 
 }
 

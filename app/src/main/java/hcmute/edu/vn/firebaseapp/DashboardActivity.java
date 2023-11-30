@@ -47,6 +47,7 @@ public class DashboardActivity extends AppCompatActivity {
         ft1.replace(R.id.content, fragment1, "");
         ft1.commit();
 
+        checkUserStatus();
         //init views
         //mProfileTv = findViewById(R.id.profileTv);
 
@@ -102,6 +103,7 @@ public class DashboardActivity extends AppCompatActivity {
             //user is signed in stay here
             //set email of logged in user
             //mProfileTv.setText(user.getEmail());
+
         }
         else {
             //user not signed in, go to main activity

@@ -16,6 +16,14 @@
             android:id="@+id/profileIv"
             app:civ_border_color="@null"
             android:src="@drawable/ic_default_img"/>
+
+        <TextView
+            android:id="@+id/timeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="11/28/2023 12:05 AM"
+            android:textColor="@color/black"
+            android:textSize="12sp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -26,13 +34,6 @@
             android:background="@drawable/bg_sender"
             android:padding="15dp"
             android:text="His message"/>
-        <TextView
-            android:id="@+id/timeTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="11/28/2023 12:05 AM"
-            android:textColor="@color/black"
-            android:textSize="12sp"/>
     </LinearLayout>
     <TextView
         android:layout_width="match_parent"
